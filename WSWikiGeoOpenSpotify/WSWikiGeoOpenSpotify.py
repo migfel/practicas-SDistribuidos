@@ -8,10 +8,10 @@ import spotipy
 
 app = Flask(__name__)
 
-GEONAMES_USER = 'migfel'
-OPENWEATHER_KEY = '152b1599f3e42d9d0f559bf3cf348a2b'
-SPOTIFY_CLIENT_ID = 'ce5f91a578f94e2bb2b64674862811a8'
-SPOTIFY_CLIENT_SECRET = '45dcefd3a70e461cb11a5ace18ba354a'
+GEONAMES_USER = 'tu user'
+OPENWEATHER_KEY = 'tu api key de openweather'
+SPOTIFY_CLIENT_ID = 'client id de spotify'
+SPOTIFY_CLIENT_SECRET = 'tu client secret de spotify'
 
 sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
     client_id=SPOTIFY_CLIENT_ID,
