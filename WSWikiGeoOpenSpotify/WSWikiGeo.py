@@ -6,7 +6,7 @@ import requests
 
 app = Flask(__name__)
 
-GEONAMES_USER = 'migfel'  # <-- Reemplaza con tu usuario de GeoNames
+GEONAMES_USER = 'tu usuario'  # <-- Reemplaza con tu usuario de GeoNames
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
