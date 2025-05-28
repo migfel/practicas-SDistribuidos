@@ -7,8 +7,8 @@ import os
 
 app = Flask(__name__)
 
-GEONAMES_USER = 'migfel'
-OPENWEATHER_KEY = '152b1599f3e42d9d0f559bf3cf348a2b'
+GEONAMES_USER = 'tu usuario '
+OPENWEATHER_KEY = 'tu api key de openweather'
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
