@@ -3,77 +3,31 @@
  * These are only templates and you can use them
  * as a guideline for developing your own functions.
  */
-/*
-revisar que rpcbind esta activo, sino habilite con 
+/*revisar que rpcbind esta activo, sino habilite con 
 sudo systemctl enable --now rpcbind
 sudo systemctl status rpcbind
 */
+// server.c
+#include <stdlib.h>
+#include <time.h>
 #include "rand.h"
 
-void * inicializa_random_1_svc(long *argp, struct svc_req *rqstp)
-{
-	static char * result;
-
-	/*
-	 * insert server code here
-	 */
-
-	return (void *) &result;
-}
-
-double *
-obtiene_siguiente_random_1_svc(void *argp, struct svc_req *rqstp)
-{
-	static double  result;
-
-	/*
-	 * insert server code here
-	 */
-
-	return &result;
-}
-
-
-
-
-
-
-
-
-/*
-#include <stdlib.h>   // Para srand() y rand()
-#include <time.h>     // Para time() si queremos usarlo como semilla
-#include "rand.h"     // Cabecera generada por rpcgen
-
-// Función para inicializar el generador de números aleatorios
+// INICIALIZA_RANDOM: retorna void -> en C es void* y se regresa un dummy
 void *inicializa_random_1_svc(long *argp, struct svc_req *rqstp)
 {
-    static char *result;  // Variable estática para devolver el resultado
+    static char dummy;  // cualquier dirección válida
+    long seed = *argp;
 
-    // Usamos el valor del argumento como semilla, o time(NULL) si es 0
-    if (*argp == 0) {
-        srand(time(NULL));  // Si el argumento es 0, usamos la hora actual como semilla
-    } else {
-        srand(*argp);       // Usamos el valor pasado como semilla
-    }
+    if (seed == 0) seed = (long)time(NULL);
+    srand((unsigned int)seed);
 
-    result = "Generador de números aleatorios inicializado";  // Mensaje de éxito
-
-    return (void *) &result;  // Devolvemos el puntero al resultado
+    return (void *)&dummy;  // porque el resultado es "void" en el .x
 }
 
-// Función para obtener el siguiente número aleatorio
+// OBTIENE_SIGUIENTE_RANDOM: sin args, retorna double
 double *obtiene_siguiente_random_1_svc(void *argp, struct svc_req *rqstp)
 {
-    static double result;  // Variable estática para devolver el resultado
-
-    // Generamos un número aleatorio entre 0 y 1 dividiendo por RAND_MAX
-    result = (double) rand() / RAND_MAX;
-
-    return &result;  // Devolvemos el puntero al resultado
+    static double result;
+    result = (double)rand() / (double)RAND_MAX;
+    return &result;
 }
-*/
-
-
-
-
