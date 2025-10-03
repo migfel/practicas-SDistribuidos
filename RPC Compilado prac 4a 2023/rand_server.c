@@ -3,7 +3,11 @@
  * These are only templates and you can use them
  * as a guideline for developing your own functions.
  */
-
+/*
+revisar que rpcbind esta activo, sino habilite con 
+sudo systemctl enable --now rpcbind
+sudo systemctl status rpcbind
+*/
 #include "rand.h"
 
 void * inicializa_random_1_svc(long *argp, struct svc_req *rqstp)
