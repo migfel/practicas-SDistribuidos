@@ -1,0 +1,25 @@
+// server.c
+#include <stdlib.h>
+#include <time.h>
+#include "rand.h"
+
+// INICIALIZA_RANDOM: retorna void -> en C es void* y se regresa un dummy
+void *inicializa_random_1_svc(long *argp, struct svc_req *rqstp)
+{
+    static char dummy;  // cualquier dirección válida
+    long seed = *argp;
+
+    if (seed == 0) seed = (long)time(NULL);
+    srand((unsigned int)seed);
+
+    return (void *)&dummy;  // porque el resultado es "void" en el .x
+}
+
+// OBTIENE_SIGUIENTE_RANDOM: sin args, retorna double
+double *obtiene_siguiente_random_1_svc(void *argp, struct svc_req *rqstp)
+{
+    static double result;
+    result = (double)rand() / (double)RAND_MAX;
+    return &result;
+}
+
