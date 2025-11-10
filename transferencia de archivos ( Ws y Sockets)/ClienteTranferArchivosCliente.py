@@ -21,7 +21,7 @@ def descargar_archivo():
 
     ruta_archivo = filedialog.asksaveasfilename()  # Abre un cuadro de diálogo para seleccionar una ubicación de descarga
     if ruta_archivo:
-        url = 'http://localhost:5000/download/archivo.txt'  # Debes especificar el nombre del archivo que deseas descargar
+        url = 'http://localhost:5000/descargar/archivo.txt'  # Debes especificar el nombre del archivo que deseas descargar
         respuesta = requests.get(url)
         if respuesta.status_code == 200:
             with open(ruta_archivo, 'wb') as f:
@@ -40,3 +40,4 @@ if __name__ == '__main__':
         descargar_archivo()
     else:
         print("Elección no válida")
+
