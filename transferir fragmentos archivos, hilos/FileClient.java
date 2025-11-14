@@ -8,15 +8,14 @@ public class FileClient {
             DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
 
             // Enviar nombre del archivo
-            dos.writeUTF("uno.mp4");
+            dos.writeUTF("example.bin");
 
-            // Enviar archivo en fragmentos
-            FileInputStream fis = new FileInputStream("uno.mp4");
+            // Enviar archivo en 10 pedazos
+            FileInputStream fis = new FileInputStream("path/to/example.bin");
             byte[] buffer = new byte[1024];
             int bytesRead;
-
-            // Leer hasta que read() regrese -1 (fin del archivo)
-            while ((bytesRead = fis.read(buffer)) != -1) {
+            for (int i = 0; i < 10; i++) {
+                bytesRead = fis.read(buffer);
                 dos.write(buffer, 0, bytesRead);
             }
 
