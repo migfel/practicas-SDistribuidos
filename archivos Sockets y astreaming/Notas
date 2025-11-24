@@ -1,0 +1,64 @@
+En esta carpeta 
+A) Programación Bloqueante vs Asíncrona
+codigo Socket tracdicional 
+y codigo Socket asincrono ( "Streaming")
+
+Primer código (socket bloqueante):
+
+Usa socket.socket(AF_INET, SOCK_STREAM) directamente.
+
+La ejecución se detiene en:
+accept()
+recv()
+listen()
+
+Solo puede manejar una conexión a la vez.
+Ideal para scripts sencillos o demostrativos.
+
+Segundo código (asyncio):
+Usa asyncio.open_connection, que internamente abre un socket TCP asíncrono.
+Permite enviar/recibir datos sin bloquear el programa.
+Escalable para múltiples conexiones concurrentes.
+Permite continuar otras tareas mientras el archivo se transmite.
+
+B) Envío y recepción de datos
+Primer código (servidor):
+El servidor recibe un archivo.
+Recibe primero el tamaño:
+conn.recv(1024)
+Luego recibe el archivo en chunks.
+Segundo código (cliente):
+El cliente envía el archivo.
+Envía primero el tamaño del archivo:
+writer.write(file_size + b'\n')
+Luego transmite por chunks con:
+writer.write(chunk)
+await writer.drain()
+C) Manejo de flujos de datos
+Primer código (socket crudo):
+Recibe datos así:
+chunk = conn.recv(buffer_size)
+Esto:
+Se bloquea si no hay datos
+No permite ejecutar otra cosa mientras espera
+Segundo código (asyncio):
+Usa:
+await writer.drain()
+
+Esto:
+No bloquea el programa
+Permite correr otras tareas concurrentemente
+Es el equivalente asíncrono de "asegúrate de que la tubería está lista"
+
+ D) Tipo de "streaming"
+Primer código
+ Es transferencia por sockets normal (bloqueante).
+ No es "streaming" explícito, pero recibe datos por stream TCP, como cualquier socket.
+
+Segundo código
+ Sí es más parecido a streaming, porque:
+Usa asyncio
+Envía el archivo en flujo continuo
+No bloquea, permite procesar chunks mientras llegan
+
+Aun así, sigue siendo transferencia de archivos por TCP, solo que asíncrona.
