@@ -1,0 +1,31 @@
+4. Resumen rápido de uso
+
+Genera los stubs gRPC:
+
+python -m grpc_tools.protoc -I. \
+  --python_out=. \
+  --grpc_python_out=. \
+  file_transfer.proto
+
+
+Ejecuta el servidor:
+
+python file_server_gui_grpc.py
+
+
+Deja el puerto por defecto 50051 o cambia.
+
+Pulsa “Iniciar servidor”.
+
+Ejecuta el cliente:
+
+python file_client_gui_grpc.py
+
+
+Pon host = localhost, puerto = 50051 (o el que uses).
+
+Elige el archivo con “Buscar”.
+
+Pulsa “Enviar archivo”.
+
+Verás el porcentaje y los logs tanto en el cliente como en el servidor, tal como en tus versiones Java pero ahora sobre gRPC en Python.
