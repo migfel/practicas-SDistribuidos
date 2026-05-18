@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package filetransfer;
+
+// Fragmento de archivo que envía el cliente
+message FileChunk {
+  string file_name = 1;    // Nombre del archivo
+  int64 total_size = 2;    // Tamaño total del archivo en bytes
+  bytes content = 3;       // Bloque de datos
+}
+
+// Respuesta del servidor al terminar
+message UploadStatus {
+  bool success = 1;
+  string message = 2;
+}
+
+// Servicio de transferencia de archivos
+service FileTransfer {
+  // El cliente envía un stream de bloques (subida)
+  rpc Upload (stream FileChunk) returns (UploadStatus);
+}
