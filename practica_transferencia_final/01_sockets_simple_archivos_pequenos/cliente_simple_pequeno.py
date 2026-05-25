@@ -1,8 +1,9 @@
 import socket
 import os
+import sys
 
 def main():
-    SERVER = "localhost"
+    SERVER = sys.argv[1] if len(sys.argv) > 1 else "localhost"
     PORT = 12345
     FILE_PATH = "example.bin"   # Cambia la ruta si lo necesitas
 
