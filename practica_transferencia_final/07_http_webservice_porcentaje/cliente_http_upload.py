@@ -1,7 +1,10 @@
 import os
 import requests
+import sys
 
-URL = "http://localhost:8000/upload"
+HOST = sys.argv[1] if len(sys.argv) > 1 else "localhost"
+URL = f"http://{HOST}:8000/upload"
+
 FILE_PATH = "uno.mp4"
 BUFFER_SIZE = 64 * 1024
 
