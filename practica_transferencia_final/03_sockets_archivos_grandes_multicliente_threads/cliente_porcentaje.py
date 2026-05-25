@@ -1,8 +1,9 @@
 import socket
 import struct
 import os
+import sys
 
-HOST = "localhost"
+HOST = sys.argv[1] if len(sys.argv) > 1 else "localhost"
 PORT = 12345
 FILE_PATH = "uno.mp4"
 
