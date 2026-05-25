@@ -8,16 +8,34 @@ PORT = 12345
 FILE_PATH = "uno.mp4"
 
 
+def generar_archivo_prueba(ruta, tam_mb=50):
+
+    if os.path.exists(ruta):
+        print(f"Archivo existente: {ruta}")
+        return
+
+    print(f"Generando archivo de prueba de {tam_mb} MB...")
+
+    with open(ruta, "wb") as f:
+        f.write(os.urandom(tam_mb * 1024 * 1024))
+
+    print(f"Archivo generado: {ruta}")
+
+
 def enviar_utf(sock, texto):
+
     datos = texto.encode("utf-8")
 
-    # Equivalente a writeUTF de Java
+    # Similar a writeUTF de Java
     sock.sendall(struct.pack(">H", len(datos)))
     sock.sendall(datos)
 
 
 try:
-    # Archivo a enviar
+
+    # Generar archivo automáticamente si no existe
+    generar_archivo_prueba(FILE_PATH, 50)
+
     if not os.path.exists(FILE_PATH):
         print("El archivo no existe:", os.path.abspath(FILE_PATH))
         exit()
@@ -25,6 +43,7 @@ try:
     file_size = os.path.getsize(FILE_PATH)
 
     cliente = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
     cliente.connect((HOST, PORT))
 
     # 1. Enviar nombre del archivo
@@ -38,11 +57,16 @@ try:
     total_sent = 0
     last_percent = 0
 
-    print(f"Enviando archivo: {os.path.basename(FILE_PATH)} ({file_size} bytes)")
+    print(
+        f"Enviando archivo: "
+        f"{os.path.basename(FILE_PATH)} "
+        f"({file_size} bytes)"
+    )
 
     with open(FILE_PATH, "rb") as archivo:
 
         while True:
+
             datos = archivo.read(buffer_size)
 
             if not datos:
@@ -55,7 +79,12 @@ try:
             percent = int((total_sent * 100) / file_size)
 
             if percent != last_percent:
-                print(f"\rProgreso envío: {percent}%", end="")
+
+                print(
+                    f"\rProgreso envío: {percent}%",
+                    end=""
+                )
+
                 last_percent = percent
 
     print("\nEnvío completado.")
