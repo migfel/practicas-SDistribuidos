@@ -9,11 +9,21 @@ FILE_PATH = "uno.mp4"
 BUFFER_SIZE = 64 * 1024
 
 
+def generar_archivo_prueba(ruta, tam_mb=50):
+    if os.path.exists(ruta):
+        print(f"Archivo existente: {ruta}")
+        return
+
+    print(f"Generando archivo de prueba de {tam_mb} MB...")
+    with open(ruta, "wb") as f:
+        f.write(os.urandom(tam_mb * 1024 * 1024))
+
+    print(f"Archivo generado: {ruta}")
+
+
 def main():
     try:
-        if not os.path.exists(FILE_PATH):
-            print("El archivo no existe:", os.path.abspath(FILE_PATH))
-            return
+        generar_archivo_prueba(FILE_PATH, 50)
 
         file_size = os.path.getsize(FILE_PATH)
         file_name = os.path.basename(FILE_PATH)
@@ -42,12 +52,11 @@ def main():
 
                     total_sent += len(chunk)
 
-                    if file_size > 0:
-                        percent = (total_sent * 100) // file_size
+                    percent = (total_sent * 100) // file_size
 
-                        if percent != last_percent:
-                            print(f"\rProgreso cliente: {percent}%", end="")
-                            last_percent = percent
+                    if percent != last_percent:
+                        print(f"\rProgreso cliente: {percent}%", end="")
+                        last_percent = percent
 
                     yield chunk
 
