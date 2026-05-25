@@ -19,31 +19,25 @@ def recibir_exactamente(sock, n):
 
 
 def main():
-
     os.makedirs("recibidos", exist_ok=True)
 
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    # Permite reutilizar el puerto rápidamente
     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
     server_socket.bind((HOST, PORT))
 
-    # Permite varias conexiones en cola
     server_socket.listen(5)
 
     print(f"Servidor escuchando en {HOST}:{PORT}")
     print("Esperando conexiones...")
 
     while True:
-
         client_socket, addr = server_socket.accept()
 
         print(f"\nCliente conectado desde: {addr}")
 
         try:
-
-            # Recibir tamaño del nombre
             filename_length_bytes = recibir_exactamente(client_socket, 4)
 
             if not filename_length_bytes:
@@ -51,16 +45,9 @@ def main():
                 client_socket.close()
                 continue
 
-            filename_length = int.from_bytes(
-                filename_length_bytes,
-                "big"
-            )
+            filename_length = int.from_bytes(filename_length_bytes, "big")
 
-            # Recibir nombre
-            filename_bytes = recibir_exactamente(
-                client_socket,
-                filename_length
-            )
+            filename_bytes = recibir_exactamente(client_socket, filename_length)
 
             if not filename_bytes:
                 print("No se recibió el nombre del archivo.")
@@ -69,68 +56,48 @@ def main():
 
             filename = filename_bytes.decode()
 
-           ip_cliente = addr[0].replace(".", "_")
-puerto_cliente = addr[1]
+            ip_cliente = addr[0].replace(".", "_")
+            puerto_cliente = addr[1]
 
-output_filename = os.path.join(
-    "recibidos",
-    f"received_{ip_cliente}_{puerto_cliente}_" + os.path.basename(filename)
-)
+            output_filename = os.path.join(
+                "recibidos",
+                f"received_{ip_cliente}_{puerto_cliente}_{os.path.basename(filename)}"
             )
 
-            print(f"Archivo recibido: {filename}")
+            print(f"Nombre del archivo recibido: {filename}")
+            print(f"Guardando como: {output_filename}")
 
             total_recibido = 0
 
             with open(output_filename, "wb") as f:
-
                 while True:
-
-                    # Recibir tamaño del chunk
-                    chunk_size_bytes = recibir_exactamente(
-                        client_socket,
-                        4
-                    )
+                    chunk_size_bytes = recibir_exactamente(client_socket, 4)
 
                     if not chunk_size_bytes:
                         print("Conexión cerrada inesperadamente.")
                         break
 
-                    chunk_size = int.from_bytes(
-                        chunk_size_bytes,
-                        "big"
-                    )
+                    chunk_size = int.from_bytes(chunk_size_bytes, "big")
 
-                    # Fin del archivo
                     if chunk_size == 0:
                         break
 
-                    # Recibir chunk completo
-                    data = recibir_exactamente(
-                        client_socket,
-                        chunk_size
-                    )
+                    data = recibir_exactamente(client_socket, chunk_size)
 
                     if not data:
                         print("Chunk incompleto.")
                         break
 
                     f.write(data)
-
                     total_recibido += len(data)
 
                     print(
-                        f"Recibidos: "
-                        f"{total_recibido / (1024 * 1024):.2f} MB",
+                        f"Recibidos: {total_recibido / (1024 * 1024):.2f} MB",
                         end="\r"
                     )
 
             print(f"\nArchivo guardado en: {output_filename}")
-
-            print(
-                f"Total recibido: "
-                f"{total_recibido / (1024 * 1024):.2f} MB"
-            )
+            print(f"Total recibido: {total_recibido / (1024 * 1024):.2f} MB")
 
         except Exception as e:
             print("Error:", e)
