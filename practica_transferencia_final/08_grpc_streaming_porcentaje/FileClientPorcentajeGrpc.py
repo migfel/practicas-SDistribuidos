@@ -2,8 +2,14 @@ import grpc
 import file_service_pb2
 import file_service_pb2_grpc
 import os
+import sys
 
-HOST = "localhost:12345"
+
+
+HOST = sys.argv[1] if len(sys.argv) > 1 else "localhost"
+
+
+
 FILE_PATH = "uno.mp4"
 
 
@@ -58,7 +64,10 @@ def main():
     print(f"Iniciando envío de: {FILE_PATH}")
     print(f"Tamaño: {file_size} bytes")
 
-    channel = grpc.insecure_channel(HOST)
+SERVER = f"{HOST}:50051"
+
+channel = grpc.insecure_channel(SERVER)
+
 
     stub = file_service_pb2_grpc.FileServiceStub(channel)
 
