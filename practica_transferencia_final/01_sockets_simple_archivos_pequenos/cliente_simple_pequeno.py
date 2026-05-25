@@ -2,39 +2,76 @@ import socket
 import os
 import sys
 
+def crear_archivo_prueba(ruta="example.bin", tam_mb=50):
+    if os.path.exists(ruta):
+        print(f"Archivo existente: {ruta}")
+        return
+
+    print(f"Generando archivo de prueba de {tam_mb} MB...")
+    with open(ruta, "wb") as f:
+        f.write(os.urandom(tam_mb * 1024 * 1024))
+
+    print(f"Archivo generado: {ruta}")
+
+
 def main():
     SERVER = sys.argv[1] if len(sys.argv) > 1 else "localhost"
     PORT = 12345
-    FILE_PATH = "example.bin"   # Cambia la ruta si lo necesitas
+    FILE_PATH = "example.bin"
+
+    crear_archivo_prueba(FILE_PATH, 50)
 
     if not os.path.exists(FILE_PATH):
         print("El archivo no existe:", FILE_PATH)
         return
 
-    # Conectarse al servidor
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client_socket.connect((SERVER, PORT))
-    print("Conectado al servidor.")
+    try:
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client_socket.connect((SERVER, PORT))
+        print(f"Conectado al servidor {SERVER}:{PORT}")
 
-    # Enviar nombre del archivo
-    filename = os.path.basename(FILE_PATH).encode()
-    client_socket.send(len(filename).to_bytes(4, "big"))
-    client_socket.send(filename)
+        filename = os.path.basename(FILE_PATH).encode()
+        client_socket.sendall(len(filename).to_bytes(4, "big"))
+        client_socket.sendall(filename)
 
-    # Enviar archivo en partes (chunks)
-    with open(FILE_PATH, "rb") as f:
-        while True:
-            chunk = f.read(4096)
-            if not chunk:
-                break
-            client_socket.send(len(chunk).to_bytes(4, "big"))
-            client_socket.send(chunk)
+        total_size = os.path.getsize(FILE_PATH)
+        sent = 0
 
-    # Enviar chunk final vacío (fin del archivo)
-    client_socket.send((0).to_bytes(4, "big"))
+        with open(FILE_PATH, "rb") as f:
+            while True:
+                chunk = f.read(4096)
 
-    print("Archivo enviado exitosamente.")
-    client_socket.close()
+                if not chunk:
+                    break
+
+                client_socket.sendall(len(chunk).to_bytes(4, "big"))
+                client_socket.sendall(chunk)
+
+                sent += len(chunk)
+                progress = (sent / total_size) * 100
+                print(f"Progreso envío: {progress:.2f}%")
+
+        client_socket.sendall((0).to_bytes(4, "big"))
+
+        print("Archivo enviado exitosamente.")
+
+    except ConnectionRefusedError:
+        print("Error: conexión rechazada. Verifica que el servidor esté encendido.")
+    except TimeoutError:
+        print("Error: tiempo de conexión agotado.")
+    except BrokenPipeError:
+        print("Error: el servidor cerró la conexión.")
+    except ConnectionResetError:
+        print("Error: la conexión fue reiniciada por el servidor.")
+    except Exception as e:
+        print("Error inesperado:", e)
+
+    finally:
+        try:
+            client_socket.close()
+        except:
+            pass
+
 
 if __name__ == "__main__":
     main()
