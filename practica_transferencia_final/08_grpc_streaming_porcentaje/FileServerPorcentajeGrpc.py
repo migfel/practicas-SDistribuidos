@@ -3,7 +3,7 @@ from concurrent import futures
 import file_service_pb2
 import file_service_pb2_grpc
 
-PORT = 12345
+PORT = 50051
 
 
 class FileServiceServicer(file_service_pb2_grpc.FileServiceServicer):
