@@ -1,64 +1,140 @@
 import socket
 import os
 
+HOST = "0.0.0.0"
+PORT = 12345
+
 def recibir_exactamente(sock, n):
     datos = b""
+
     while len(datos) < n:
         parte = sock.recv(n - len(datos))
+
         if not parte:
             return None
+
         datos += parte
+
     return datos
 
+
 def main():
-    HOST = "0.0.0.0"
-    PORT = 12345
+
+    os.makedirs("recibidos", exist_ok=True)
 
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    # Permite reutilizar el puerto rápidamente
+    server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
     server_socket.bind((HOST, PORT))
-    server_socket.listen(1)
 
-    print("Servidor esperando conexión...")
+    # Permite varias conexiones en cola
+    server_socket.listen(5)
 
-    client_socket, addr = server_socket.accept()
-    print(f"Cliente conectado desde: {addr}")
+    print(f"Servidor escuchando en {HOST}:{PORT}")
+    print("Esperando conexiones...")
 
-    filename_length_bytes = recibir_exactamente(client_socket, 4)
-    filename_length = int.from_bytes(filename_length_bytes, "big")
+    while True:
 
-    filename_bytes = recibir_exactamente(client_socket, filename_length)
-    filename = filename_bytes.decode()
+        client_socket, addr = server_socket.accept()
 
-    output_filename = "received_" + os.path.basename(filename)
-    print(f"Nombre del archivo recibido: {filename}")
+        print(f"\nCliente conectado desde: {addr}")
 
-    total_recibido = 0
+        try:
 
-    with open(output_filename, "wb") as f:
-        while True:
-            chunk_size_bytes = recibir_exactamente(client_socket, 4)
+            # Recibir tamaño del nombre
+            filename_length_bytes = recibir_exactamente(client_socket, 4)
 
-            if not chunk_size_bytes:
-                break
+            if not filename_length_bytes:
+                print("No se recibió el tamaño del nombre.")
+                client_socket.close()
+                continue
 
-            chunk_size = int.from_bytes(chunk_size_bytes, "big")
+            filename_length = int.from_bytes(
+                filename_length_bytes,
+                "big"
+            )
 
-            if chunk_size == 0:
-                break
+            # Recibir nombre
+            filename_bytes = recibir_exactamente(
+                client_socket,
+                filename_length
+            )
 
-            data = recibir_exactamente(client_socket, chunk_size)
+            if not filename_bytes:
+                print("No se recibió el nombre del archivo.")
+                client_socket.close()
+                continue
 
-            if not data:
-                break
+            filename = filename_bytes.decode()
 
-            f.write(data)
-            total_recibido += len(data)
+            output_filename = os.path.join(
+                "recibidos",
+                "received_" + os.path.basename(filename)
+            )
 
-    print(f"Archivo recibido correctamente: {output_filename}")
-    print(f"Total recibido: {total_recibido} bytes")
+            print(f"Archivo recibido: {filename}")
 
-    client_socket.close()
-    server_socket.close()
+            total_recibido = 0
+
+            with open(output_filename, "wb") as f:
+
+                while True:
+
+                    # Recibir tamaño del chunk
+                    chunk_size_bytes = recibir_exactamente(
+                        client_socket,
+                        4
+                    )
+
+                    if not chunk_size_bytes:
+                        print("Conexión cerrada inesperadamente.")
+                        break
+
+                    chunk_size = int.from_bytes(
+                        chunk_size_bytes,
+                        "big"
+                    )
+
+                    # Fin del archivo
+                    if chunk_size == 0:
+                        break
+
+                    # Recibir chunk completo
+                    data = recibir_exactamente(
+                        client_socket,
+                        chunk_size
+                    )
+
+                    if not data:
+                        print("Chunk incompleto.")
+                        break
+
+                    f.write(data)
+
+                    total_recibido += len(data)
+
+                    print(
+                        f"Recibidos: "
+                        f"{total_recibido / (1024 * 1024):.2f} MB",
+                        end="\r"
+                    )
+
+            print(f"\nArchivo guardado en: {output_filename}")
+
+            print(
+                f"Total recibido: "
+                f"{total_recibido / (1024 * 1024):.2f} MB"
+            )
+
+        except Exception as e:
+            print("Error:", e)
+
+        finally:
+            client_socket.close()
+            print("Conexión cerrada.")
+
 
 if __name__ == "__main__":
     main()
