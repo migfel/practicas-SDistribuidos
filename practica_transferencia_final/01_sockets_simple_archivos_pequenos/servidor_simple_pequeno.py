@@ -69,9 +69,13 @@ def main():
 
             filename = filename_bytes.decode()
 
-            output_filename = os.path.join(
-                "recibidos",
-                "received_" + os.path.basename(filename)
+           ip_cliente = addr[0].replace(".", "_")
+puerto_cliente = addr[1]
+
+output_filename = os.path.join(
+    "recibidos",
+    f"received_{ip_cliente}_{puerto_cliente}_" + os.path.basename(filename)
+)
             )
 
             print(f"Archivo recibido: {filename}")
