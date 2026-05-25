@@ -1,4 +1,14 @@
 import socket
+import os
+
+def recibir_exactamente(sock, n):
+    datos = b""
+    while len(datos) < n:
+        parte = sock.recv(n - len(datos))
+        if not parte:
+            return None
+        datos += parte
+    return datos
 
 def main():
     HOST = "0.0.0.0"
@@ -13,26 +23,40 @@ def main():
     client_socket, addr = server_socket.accept()
     print(f"Cliente conectado desde: {addr}")
 
-    # Recibir nombre del archivo
-    filename_length = int.from_bytes(client_socket.recv(4), "big")
-    filename = client_socket.recv(filename_length).decode()
+    filename_length_bytes = recibir_exactamente(client_socket, 4)
+    filename_length = int.from_bytes(filename_length_bytes, "big")
+
+    filename_bytes = recibir_exactamente(client_socket, filename_length)
+    filename = filename_bytes.decode()
+
+    output_filename = "received_" + os.path.basename(filename)
     print(f"Nombre del archivo recibido: {filename}")
 
-    # Preparar archivo destino
-    with open(filename, "wb") as f:
+    total_recibido = 0
+
+    with open(output_filename, "wb") as f:
         while True:
-            chunk_size_bytes = client_socket.recv(4)
+            chunk_size_bytes = recibir_exactamente(client_socket, 4)
+
             if not chunk_size_bytes:
-                break  # No más datos
+                break
 
             chunk_size = int.from_bytes(chunk_size_bytes, "big")
+
             if chunk_size == 0:
-                break  # Fin del archivo
+                break
 
-            data = client_socket.recv(chunk_size)
+            data = recibir_exactamente(client_socket, chunk_size)
+
+            if not data:
+                break
+
             f.write(data)
+            total_recibido += len(data)
 
-    print("Archivo recibido correctamente.")
+    print(f"Archivo recibido correctamente: {output_filename}")
+    print(f"Total recibido: {total_recibido} bytes")
+
     client_socket.close()
     server_socket.close()
 
