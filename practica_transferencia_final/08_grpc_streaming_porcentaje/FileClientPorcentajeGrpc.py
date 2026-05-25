@@ -22,6 +22,7 @@ def generar_archivo_prueba(ruta, tam_mb=50):
 
 
 def generar_chunks(file_path):
+
     file_size = os.path.getsize(file_path)
     file_name = os.path.basename(file_path)
 
@@ -29,9 +30,11 @@ def generar_chunks(file_path):
     buffer_size = 64 * 1024
 
     with open(file_path, "rb") as f:
+
         primer_chunk = True
 
         while True:
+
             data = f.read(buffer_size)
 
             if not data:
@@ -40,9 +43,14 @@ def generar_chunks(file_path):
             sent_bytes += len(data)
 
             porcentaje = int((sent_bytes * 100) / file_size)
-            print(f"\rProgreso de envío: {porcentaje}%", end="")
+
+            print(
+                f"\rProgreso de envío: {porcentaje}%",
+                end=""
+            )
 
             if primer_chunk:
+
                 primer_chunk = False
 
                 yield file_service_pb2.FileChunk(
@@ -50,7 +58,9 @@ def generar_chunks(file_path):
                     file_size=file_size,
                     data=data
                 )
+
             else:
+
                 yield file_service_pb2.FileChunk(
                     data=data
                 )
